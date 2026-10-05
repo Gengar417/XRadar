@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IBM QRadar 7.5.0 — Static Demo</title>
+<style>
+  :root{
+    --bg:#090a0d;
+    --bg2:#111317;
+    --bg3:#181b21;
+    --panel:#1f2329;
+    --panel2:#242931;
+    --panel3:#2a3039;
+    --line:#343b46;
+    --line2:#454e5d;
+    --text:#eef2f7;
+    --text2:#d6dbe4;
+    --muted:#a9b1bd;
+    --muted2:#8993a2;
+    --blue:#4aa3ff;
+    --blue2:#2d6fd6;
+    --green:#a8c87d;
+    --green2:#93b56d;
+    --orange:#ff9b42;
+    --purple:#8d64ff;
+    --teal:#12b3b3;
+    --red:#f16d6d;
+    --yellow:#d6c35b;
+    --shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 0 0 1px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.18);
+    --font:"Segoe UI", Tahoma, Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:linear-gradient(180deg,#090a0d 0%, #07080a 100%);color:var(--text);font-family:var(--font);font-size:12px}
+  body{overflow:hidden}
+  button,input,select,textarea{font:inherit}
+  a{color:#89b8ff;text-decoration:none}
+  a:hover{text-decoration:underline}
+  .hidden{display:none!important}
+
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:#0f1116}
+  ::-webkit-scrollbar-thumb{background:#3c4452;border:2px solid #0f1116;border-radius:8px}
+  ::-webkit-scrollbar-thumb:hover{background:#536072}
+
+  .app{display:grid;grid-template-columns:220px 1fr;grid-template-rows:54px 36px 34px 1fr;height:100vh}
+  .topbar{
+    grid-column:1 / -1;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 14px 0 0;
+    background:linear-gradient(180deg,#0f1115 0%, #0c0e12 100%);
+    border-bottom:1px solid #21262f;
+  }
+  .top-left{display:flex;align-items:center;height:100%}
+  .menu-btn{
+    width:54px;height:54px;border:0;border-right:1px solid #21262f;background:linear-gradient(180deg,#1a1e25 0%, #11151b 100%);
+    color:#f3f6fb;font-size:20px;cursor:pointer
+  }
+  .menu-btn:hover{background:linear-gradient(180deg,#242933 0%, #171c23 100%)}
+  .brand{padding-left:14px;font-size:15px;color:#f4f7fb}
+  .brand b{font-weight:700}
+  .top-right{display:flex;align-items:center;gap:0;height:100%}
+  .top-icon{
+    width:44px;height:54px;border:0;border-left:1px solid #21262f;background:transparent;color:#e7ebf3;cursor:pointer;font-size:20px
+  }
+  .top-icon:hover{background:#151922}
+  .system-time{padding:0 12px;color:#e5e9f1;font-size:12px}
+  .main-nav{
+    grid-column:2 / 3;
+    display:flex;align-items:center;gap:0;padding:0 14px;overflow:auto;
+    background:linear-gradient(180deg,#101216 0%, #0d0f13 100%);
+    border-bottom:1px solid #252a33
+  }
+  .main-nav .tab{
+    position:relative;
+    padding:10px 14px;color:#ecf0f6;white-space:nowrap;cursor:pointer
+  }
+  .main-nav .tab:hover{background:#151920}
+  .main-nav .tab.active::after{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:#49a2ff
+  }
+
+  .sidebar{
+    grid-row:2 / 5;
+    background:linear-gradient(180deg,#111318 0%, #0a0c10 100%);
+    border-right:1px solid #242a33;
+    overflow:auto
+  }
+  .side-head{
+    padding:10px 12px;font-size:11px;color:var(--muted2);
+    border-bottom:1px solid #1a1e24;
+    text-transform:none
+  }
+  .side-group{padding:6px 0}
+  .side-item{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:8px;padding:8px 12px;color:#f4f7fb;cursor:pointer;
+    border-left:3px solid transparent
+  }
+  .side-item:hover{background:#161a21}
+  .side-item.active{background:#181d25;border-left-color:#49a2ff;font-weight:600}
+  .side-item .star{color:#5aa9ff;font-size:11px}
+  .side-divider{height:1px;background:#222833;margin:8px 0}
+  .try-new{
+    margin:8px 0;padding:8px 12px;
+    background:linear-gradient(90deg,#10141d 0%, #13254b 42%, #0f6cff 55%, #13254b 72%, #10141d 100%);
+    border-top:1px solid #313846;border-bottom:1px solid #313846;color:#fff
+  }
+
+  .toolbar{
+    grid-column:2 / 3;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    padding:0 12px;
+    background:linear-gradient(180deg,#1a1e25 0%, #141821 100%);
+    border-bottom:1px solid #252b35;
+    color:var(--text2)
+  }
+  .toolbar .field{
+    height:24px;background:#0f1217;color:#eef3fb;border:1px solid #404957;padding:0 8px;min-width:150px
+  }
+  .toolbar .tool-link{color:#f2f6fc;cursor:pointer;white-space:nowrap}
+  .toolbar .tool-link:hover{text-decoration:underline}
+  .toolbar .sep{width:1px;height:16px;background:#3a4250}
+  .toolbar .right{margin-left:auto;display:flex;gap:16px;color:#e5eaf2;white-space:nowrap}
+  .content{grid-column:2 / 3;overflow:auto;padding:12px;min-width:0}
+
+  .page{display:none}
+  .page.active{display:block}
+
+  .widget-grid{
+    display:grid;
+    grid-template-columns:360px minmax(560px,1fr) 380px;
+    gap:12px;
+    min-width:1280px;
+  }
+  .col{display:flex;flex-direction:column;gap:12px}
+  .card{
+    background:linear-gradient(180deg,var(--panel) 0%, #1a1f26 100%);
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    min-height:110px;
+  }
+  .card-header{
+    height:28px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 10px;
+    background:linear-gradient(180deg,#2a2f37 0%, #1f242c 100%);
+    border-bottom:1px solid #363d49;color:#edf1f8;font-weight:600
+  }
+  .card-tools{color:#b4bcc7;font-weight:400}
+  .card-body{padding:8px 10px}
+  .small{font-size:11px;color:var(--muted)}
+  .page-title{
+    font-size:20px;font-weight:600;color:#f5f8fc;margin-bottom:10px
+  }
+
+  .graph{
+    height:180px;
+    border:1px solid #303743;
+    background:
+      linear-gradient(to bottom, rgba(255,255,255,.13) 1px, transparent 1px) 0 0/100% 36px,
+      linear-gradient(to right, rgba(255,255,255,.06) 1px, transparent 1px) 0 0/72px 100%,
+      #171b22;
+    position:relative;overflow:hidden
+  }
+  .graph.short{height:138px}
+  .graph::before{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:38%;
+    background:#a9c97e
+  }
+  .graph.wave-a::after{
+    content:"";position:absolute;inset:0;background:#a9c97e;
+    clip-path:polygon(0% 100%,0% 64%,10% 64%,12% 63%,14% 64%,16% 63%,18% 64%,20% 63%,22% 63%,24% 64%,26% 63%,28% 63%,30% 64%,32% 64%,34% 63%,36% 63%,38% 63%,40% 64%,42% 64%,44% 63%,46% 63%,48% 64%,50% 63%,52% 63%,54% 64%,56% 63%,58% 63%,60% 64%,62% 18%,64% 63%,66% 64%,68% 63%,70% 63%,72% 42%,74% 63%,76% 63%,78% 64%,80% 63%,82% 64%,84% 63%,86% 62%,88% 63%,90% 64%,92% 63%,94% 63%,96% 64%,98% 63%,100% 63%,100% 100%);
+    opacity:.95
+  }
+  .graph.wave-b::before{height:24%}
+  .graph.wave-b::after{
+    content:"";position:absolute;inset:0;background:#a9c97e;
+    clip-path:polygon(0% 100%,0% 72%,8% 72%,10% 46%,12% 78%,14% 52%,16% 81%,18% 56%,20% 78%,22% 54%,24% 75%,26% 57%,28% 76%,30% 58%,32% 79%,34% 60%,36% 76%,38% 57%,40% 78%,42% 62%,44% 80%,46% 67%,48% 84%,50% 82%,52% 86%,54% 88%,56% 84%,58% 83%,60% 82%,62% 80%,64% 78%,66% 79%,68% 81%,70% 80%,72% 79%,74% 80%,76% 81%,78% 82%,80% 79%,82% 80%,84% 40%,86% 80%,88% 82%,90% 80%,92% 82%,94% 81%,96% 80%,98% 82%,100% 81%,100% 100%);
+    opacity:.95
+  }
+  .graph.wave-c::before{height:78%}
+  .graph.wave-c::after{
+    content:"";position:absolute;inset:0;background:#a9c97e;
+    clip-path:polygon(0% 100%,0% 18%,12% 18%,14% 18%,16% 18%,18% 18%,20% 18%,22% 18%,24% 18%,26% 18%,28% 18%,30% 18%,32% 18%,34% 18%,36% 18%,38% 18%,40% 18%,42% 18%,44% 18%,46% 18%,48% 18%,50% 18%,52% 18%,54% 18%,56% 18%,58% 18%,60% 18%,62% 18%,64% 18%,66% 18%,68% 18%,70% 18%,72% 18%,74% 18%,76% 18%,78% 18%,80% 18%,82% 18%,84% 18%,86% 18%,88% 18%,90% 18%,92% 18%,94% 18%,96% 18%,98% 18%,100% 100%);
+    opacity:.95
+  }
+  .graph.wave-d::before{height:8%}
+  .graph.wave-d::after{
+    content:"";position:absolute;inset:0;background:#a9c97e;
+    clip-path:polygon(0% 100%,0% 95%,8% 95%,10% 95%,12% 95%,14% 95%,16% 95%,18% 95%,20% 95%,22% 95%,24% 95%,26% 95%,28% 95%,30% 95%,32% 95%,34% 95%,36% 95%,38% 95%,40% 95%,42% 95%,44% 95%,46% 95%,48% 95%,50% 95%,52% 95%,54% 95%,56% 95%,58% 95%,60% 95%,62% 95%,64% 95%,66% 95%,68% 95%,70% 95%,72% 95%,74% 95%,76% 95%,78% 95%,80% 95%,82% 95%,84% 95%,86% 95%,88% 95%,90% 95%,92% 95%,94% 95%,96% 95%,98% 95%,100% 100%);
+    opacity:.95
+  }
+  .graph-labels{
+    display:flex;justify-content:space-between;margin-top:6px;color:#e8edf5;font-size:11px
+  }
+  .center-link{text-align:center;margin-top:8px}
+  .legend{margin-top:8px;color:#c8d0db}
+  .legend .box{
+    display:inline-block;width:14px;height:10px;background:#a9c97e;border:1px solid #d7e3c3;border-radius:2px;vertical-align:middle;margin-right:5px
+  }
+
+  table{border-collapse:collapse;width:100%}
+  th,td{padding:6px 7px;border-bottom:1px solid #2d333d;vertical-align:top}
+  th{background:#232831;color:#e7edf5;text-align:left}
+  tr:hover td{background:#232a35}
+  .mini td,.mini th{padding:5px 6px}
+  .note-row td:first-child{white-space:nowrap}
+  .badge{display:inline-block;padding:2px 7px;border-radius:10px;border:1px solid #454d59;background:#1b2027}
+  .badge.open{background:#341d1d;border-color:#674242;color:#ffd2d2}
+  .badge.closed{background:#17241a;border-color:#436149;color:#c9efbe}
+  .badge.assigned{background:#18273c;border-color:#45617f;color:#c7ddff}
+  .kpi-table td:first-child{font-weight:600;color:#f4f8ff}
+  .kpi-table td:last-child{text-align:right;color:#f1f5fb}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .overview-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+  .overview-card{
+    border:1px solid #39414d;background:linear-gradient(180deg,#20252d 0%, #191d24 100%);
+    padding:12px;box-shadow:var(--shadow)
+  }
+  .overview-card .value{font-size:28px;font-weight:700}
+  .overview-card .label{margin-top:4px;color:#b8c1cc}
+
+  .table-wrap{
+    border:1px solid var(--line);background:linear-gradient(180deg,var(--panel) 0%, #1a1f26 100%);
+    box-shadow:var(--shadow);overflow:auto;max-height:calc(100vh - 220px)
+  }
+  .table-wrap table{min-width:1120px}
+  .toolbar-inline{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px
+  }
+  .field{
+    height:26px;background:#0f1217;color:#eef3fb;border:1px solid #404957;padding:0 8px
+  }
+  .btn{
+    height:26px;padding:0 10px;border:1px solid #4b5464;background:linear-gradient(180deg,#2d333c 0%, #20252d 100%);
+    color:#f0f4fa;cursor:pointer
+  }
+  .btn:hover{background:linear-gradient(180deg,#38414d 0%, #272d36 100%)}
+  .btn.primary{border-color:#3975d2;background:linear-gradient(180deg,#3569bf 0%, #274f91 100%)}
+  .muted{color:var(--muted)}
+  .pill{display:inline-block;min-width:18px;text-align:center;font-weight:700}
+  .checkbox-cell{width:28px}
+  .statusbar{
+    margin-top:8px;padding:6px 8px;border:1px solid #313742;background:linear-gradient(180deg,#171b21 0%, #11151a 100%);color:#b2bac6
+  }
+
+  .donut-wrap{display:flex;gap:14px;align-items:center}
+  .donut{
+    width:142px;height:142px;border-radius:50%;
+    background:conic-gradient(#ff8a3d 0 72%, #cf4d5e 72% 84%, #8d64ff 84% 93%, #12b3b3 93% 100%);
+    position:relative;flex:0 0 auto
+  }
+  .donut::after{
+    content:"";position:absolute;inset:23px;border-radius:50%;background:#1b2027;border:1px solid #313744
+  }
+  .legend-list{font-size:11px;line-height:1.6}
+  .legend-dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+
+  .bars .bar-row{display:grid;grid-template-columns:100px 1fr 24px;gap:8px;align-items:center;margin:7px 0}
+  .bar-track{height:120px}
+  .hbar{height:10px;background:#2a313c;position:relative}
+  .hbar > i{display:block;height:100%;background:#8d64ff}
+
+  .filters{
+    width:245px;flex:0 0 245px;border-right:1px solid #2e3541;padding-right:12px
+  }
+  .filters h4{margin:10px 0 8px;font-size:12px}
+  .filters label{display:block;padding:2px 0;color:#d5dbe4}
+  .content-flex{display:flex;gap:12px}
+  .grow{flex:1;min-width:0}
+
+  .detail{
+    position:fixed;right:16px;top:110px;bottom:16px;width:560px;background:linear-gradient(180deg,#1f232a 0%, #171b22 100%);
+    border:1px solid #3a4250;box-shadow:0 14px 36px rgba(0,0,0,.45);display:none;flex-direction:column;z-index:40
+  }
+  .detail.open{display:flex}
+  .detail-head{
+    height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;
+    background:linear-gradient(180deg,#2b313a 0%, #20252d 100%);border-bottom:1px solid #39414e
+  }
+  .detail-title{font-size:13px;font-weight:600}
+  .xbtn{border:0;background:transparent;color:#f2f6fc;font-size:20px;cursor:pointer}
+  .detail-tabs{display:flex;border-bottom:1px solid #313845;background:#171b22}
+  .detail-tab{padding:8px 12px;cursor:pointer;border-right:1px solid #2d3440;color:#dbe1e9}
+  .detail-tab.active{background:#222831;color:#fff}
+  .detail-body{padding:12px;overflow:auto}
+  .kv td:first-child{width:150px;background:#191e25;color:#c7cfda}
+  .timeline{border-left:2px solid #455061;margin-left:6px;padding-left:12px}
+  .timeline-item{position:relative;margin:0 0 14px}
+  .timeline-item::before{content:"";position:absolute;left:-18px;top:4px;width:8px;height:8px;border-radius:50%;background:#58a8ff}
+
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.52);display:none;z-index:60}
+  .modal-backdrop.show{display:block}
+  .modal{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(680px,95vw);background:linear-gradient(180deg,#1e232b 0%, #151920 100%);
+    border:1px solid #3c4452;box-shadow:0 16px 40px rgba(0,0,0,.5)
+  }
+  .modal-head{
+    height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;
+    background:linear-gradient(180deg,#2c323b 0%, #22272f 100%);border-bottom:1px solid #394250;font-weight:600
+  }
+  .modal-body{padding:12px}
+  .modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:10px 12px;border-top:1px solid #313947;background:#171b22}
+  .form-row{margin-bottom:10px}
+  .form-row label{display:block;margin-bottom:4px;color:#d1d7e1}
+  .form-row input,.form-row select,.form-row textarea{
+    width:100%;background:#0f1217;color:#eef2f9;border:1px solid #404957;padding:6px 8px
+  }
+  .form-row textarea{height:110px;resize:vertical}
+
+  .toast{
+    position:fixed;right:18px;bottom:18px;background:#202732;border:1px solid #4b5565;color:#f3f7fb;padding:10px 14px;display:none;z-index:80
+  }
+  .toast.show{display:block}
+
+  @media (max-width:1500px){
+    .widget-grid{grid-template-columns:1fr;min-width:0}
+    .grid-2{grid-template-columns:1fr}
+  }
+  @media (max-width:1200px){
+    .app{grid-template-columns:1fr}
+    .sidebar{display:none}
+    .main-nav,.toolbar,.content{grid-column:1/-1}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="top-left">
+      <button class="menu-btn" id="toggleSidebar">☰</button>
+      <div class="brand"><b>IBM</b> QRadar</div>
+    </div>
+    <div class="top-right">
+      <div class="system-time">System Time: <span id="headerClock">6:33 AM</span></div>
+      <button class="top-icon" id="notifBtn">🔔</button>
+      <button class="top-icon" id="userBtn">👤</button>
+    </div>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="side-head">Menu</div>
+    <div class="side-group">
+      <div class="side-item active" data-page="dashboard"><span>Dashboard</span><span class="star">★</span></div>
+      <div class="side-item" data-page="offenses"><span>Offenses</span><span class="star">★</span></div>
+      <div class="side-item" data-page="log-activity"><span>Log Activity</span><span class="star">★</span></div>
+      <div class="side-item" data-page="network-activity"><span>Network Activity</span><span class="star">★</span></div>
+      <div class="side-item" data-page="assets"><span>Assets</span><span class="star">★</span></div>
+      <div class="side-item" data-page="reports"><span>Reports</span><span class="star">★</span></div>
+      <div class="side-item" data-page="admin"><span>Admin</span><span class="star">★</span></div>
+      <div class="side-item" data-page="log-sources"><span>Log Sources</span><span class="star">★</span></div>
+      <div class="side-item" data-page="pulse"><span>Pulse</span><span class="star">★</span></div>
+      <div class="side-item" data-page="reference-data"><span>Reference Data Management</span><span class="star">★</span></div>
+      <div class="side-item" data-page="use-case"><span>Use Case Manager</span><span class="star">★</span></div>
+    </div>
+    <div class="try-new">Try the New UI</div>
+    <div class="side-group">
+      <div class="side-item"><span>QRadar Help Contents</span></div>
+      <div class="side-item"><span>About</span></div>
+      <div class="side-item"><span>Interactive API for Developers</span></div>
+    </div>
+  </aside>
+
+  <nav class="main-nav">
+    <div class="tab active" data-page="dashboard">Dashboard</div>
+    <div class="tab" data-page="offenses">Offenses</div>
+    <div class="tab" data-page="log-activity">Log Activity</div>
+    <div class="tab" data-page="network-activity">Network Activity</div>
+    <div class="tab" data-page="assets">Assets</div>
+    <div class="tab" data-page="reports">Reports</div>
+    <div class="tab" data-page="admin">Admin</div>
+    <div class="tab" data-page="log-sources">Log Sources</div>
+    <div class="tab" data-page="pulse">Pulse</div>
+    <div class="tab" data-page="use-case">Use Case Manager</div>
+    <div class="tab" data-page="reference-data">Reference Data Management</div>
+  </nav>
+
+  <div class="toolbar" id="toolbar">
+    <span>Show Dashboard:</span>
+    <select class="field" id="dashboardSelect">
+      <option>Custom Dashboard</option>
+      <option>Security Overview</option>
+      <option>Network Activity</option>
+    </select>
+    <span class="tool-link">📄 New Dashboard</span>
+    <span class="tool-link">📝 Rename Dashboard</span>
+    <span class="tool-link">⛔ Delete Dashboard</span>
+    <span class="tool-link">Add Item... ▼</span>
+    <span class="right">
+      <span>Next Refresh: <span id="refreshClock">00:00:05</span></span>
+    </span>
+  </div>
+
+  <main class="content">
+    <section class="page active" id="page-dashboard">
+      <div class="widget-grid">
+        <div class="col">
+          <div class="card">
+            <div class="card-header">Top Applications Inbound from Internet (Total Bytes) <span class="card-tools">◫ ⚙ ✕</span></div>
+            <div class="card-body">
+              <div class="small" style="display:flex;justify-content:space-between"><span>Reset Zoom</span><span>7/5/24, 6:27 AM - 7/5/24, 6:32 AM</span></div>
+              <div class="graph short wave-a"></div>
+              <div class="graph-labels"><span>6:28 AM</span><span>6:30 AM</span><span>6:32 AM</span></div>
+              <div class="legend">▼ Legend</div>
+              <div style="text-align:center;margin-top:6px"><span class="badge" style="display:inline-flex;align-items:center;gap:6px"><span class="box" style="display:inline-block;width:12px;height:10px;background:#a9c97e;border:1px solid #d7e3c3;border-radius:2px"></span> SSL/TLS</span></div>
+              <div class="center-link"><a href="#">View in Network Activity</a></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">Top Log Sources (Count) <span class="card-tools">◫ ⚙ ✕</span></div>
+            <div class="card-body">
+              <div class="small" style="text-align:center;line-height:1.4">6/21/24 6:32 AM - 7/5/24 6:32 AM<br>Accumulation began 6/28/24 3:11 AM</div>
+              <div class="donut-wrap" style="justify-content:center;margin-top:10px">
+                <div class="donut" style="background:conic-gradient(#b8df7f 0 98%, #4aa3ff 98% 99%, #13b3b3 99% 99.5%, #ff4040 99.5% 100%)"></div>
+              </div>
+              <div class="legend-list" style="margin-top:8px">
+                <div><span class="legend-dot" style="background:#b8df7f"></span>Health Metrics-2</div>
+                <div><span class="legend-dot" style="background:#4aa3ff"></span>System Notification-2</div>
+                <div><span class="legend-dot" style="background:#13b3b3"></span>SIM Audit-2</div>
+                <div><span class="legend-dot" style="background:#ff4040"></span>Custom Rule Engine-8</div>
+              </div>
+              <div class="center-link"><a href="#">View in Log Activity</a></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card">
+            <div class="card-header">Event Rate (EPS) (Events per Second Raw - Peak 1 Sec) <span class="card-tools">◫ ⚙ ✕</span></div>
+            <div class="card-body">
+              <div class="small" style="display:flex;justify-content:space-between"><span>Reset Zoom</span><span>7/2/24, 5:32 AM - 7/5/24, 6:32 AM</span></div>
+              <div class="graph wave-a"></div>
+              <div class="graph-labels"><span>1:00 PM</span><span>Jul 2</span><span>5:00 AM</span><span>1:00 PM</span><span>Jul 3</span><span>5:00 AM</span><span>Jul 4</span><span>5:00 AM</span></div>
+              <div class="center-link"><a href="#">View in Log Activity</a></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">Custom Search (Count) (time series) <span class="card-tools">◫ ⚙ ✕</span></div>
+            <div class="card-body">
+              <div class="small" style="display:flex;justify-content:space-between"><span>Reset Zoom</span><span>7/5/24, 6:17 AM - 7/5/24, 6:32 AM</span></div>
+              <div class="graph wave-c"></div>
+              <div class="graph-labels"><span>6:18 AM</span><span>6:20 AM</span><span>6:22 AM</span><span>6:24 AM</span><span>6:26 AM</span><span>6:28 AM</span><span>6:30 AM</span><span>6:32 AM</span></div>
+              <div class="legend">
+                ▼ Legend
+                <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">
+                  <span class="badge"><span class="legend-dot" style="background:#b8df7f"></span>Health Metric</span>
+                  <span class="badge"><span class="legend-dot" style="background:#5aa8ff"></span>Information Message</span>
+                  <span class="badge"><span class="legend-dot" style="background:#cccccc"></span>User Logout</span>
+                  <span class="badge"><span class="legend-dot" style="background:#00c11a"></span>User Login</span>
+                  <span class="badge"><span class="legend-dot" style="background:#ff4040"></span>Search Executed</span>
+                  <span class="badge"><span class="legend-dot" style="background:#ece75b"></span>Reminder</span>
+                </div>
+              </div>
+              <div class="center-link"><a href="#">View in Log Activity</a></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card">
+            <div class="card-header">System Summary <span class="card-tools">◫ ✕</span></div>
+            <div class="card-body">
+              <table class="mini kpi-table">
+                <tr><td>Current Flows Per Second</td><td>0</td></tr>
+                <tr><td>Flows (Past 24 Hours)</td><td>16.2K</td></tr>
+                <tr><td>Current Events Per Second</td><td>113</td></tr>
+                <tr><td>New Events (Past 24 Hours)</td><td>9.8M</td></tr>
+                <tr><td>Updated Offenses (Past 24 Hours)</td><td>1</td></tr>
+                <tr><td>Data Reduction Ratio</td><td>9851932 : 1</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">Top Category Types <span class="card-tools">◫ ✕</span></div>
+            <div class="card-body">
+              <table class="mini">
+                <thead><tr><th>Category</th><th style="width:80px">Offenses</th></tr></thead>
+                <tbody>
+                  <tr><td><a href="#">Remote Access</a></td><td>1</td></tr>
+                  <tr><td><a href="#">Web</a></td><td>1</td></tr>
+                  <tr><td><a href="#">Asset IP Address Created</a></td><td>1</td></tr>
+                  <tr><td><a href="#">Certification Validation Success</a></td><td>1</td></tr>
+                  <tr><td><a href="#">Misc</a></td><td>1</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">Security Intelligence <span class="card-tools">◫ ✕</span></div>
+            <div class="card-body">
+              <div><a href="#">Vulnerability management empowered by AI</a></div>
+              <div style="margin-top:10px;font-size:18px">⏸ ➡</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">System Notifications <span class="card-tools">◫ ⚙ ✕</span></div>
+            <div class="card-body">
+              <table class="mini note-row">
+                <thead><tr><th style="width:110px">Created</th><th>Description</th><th style="width:30px"></th></tr></thead>
+                <tbody>
+                  <tr><td>ⓘ 2h 1m 37s</td><td>SAR Sentinel: Normal operation restored.</td><td>❔</td></tr>
+                  <tr><td>⚠ 2h 3m 27s</td><td>SAR Sentinel: Threshold crossed.</td><td>❔</td></tr>
+                  <tr><td>⚠ 1d 2h 31m 39s</td><td>Unable to determine associated log source for IP address. Unable to automatically detect the associated log source for IP address.</td><td>❔</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-offenses">
+      <div class="page-title">Offenses</div>
+      <div class="content-flex">
+        <aside class="filters">
+          <div class="toolbar-inline">
+            <input class="field" id="offenseSearch" placeholder="Filter">
+          </div>
+          <h4>Domains</h4>
+          <label><input type="checkbox"> Domain 1</label>
+          <label><input type="checkbox"> Domain 2</label>
+          <h4>Severity</h4>
+          <label><input type="checkbox"> 1</label>
+          <label><input type="checkbox"> 2</label>
+          <label><input type="checkbox"> 3</label>
+          <label><input type="checkbox"> 4</label>
+          <label><input type="checkbox"> 5</label>
+          <label><input type="checkbox"> 6</label>
+          <label><input type="checkbox"> 7</label>
+          <label><input type="checkbox"> 8</label>
+          <label><input type="checkbox"> 9</label>
+          <label><input type="checkbox"> 10</label>
+          <h4>Status</h4>
+          <label><input type="checkbox" checked> Open</label>
+          <label><input type="checkbox"> Closed</label>
+          <h4>Filters</h4>
+          <label><input type="checkbox"> Source IP</label>
+          <label><input type="checkbox"> Destination IP</label>
+          <label><input type="checkbox"> Username</label>
+          <label><input type="checkbox"> Rule</label>
+        </aside>
+
+        <div class="grow">
+          <div class="overview-cards">
+            <div class="overview-card">
+              <div class="small">Open Offenses</div>
+              <div class="value" id="openOffenseMetric">0</div>
+              <div class="label">Active today</div>
+            </div>
+            <div class="overview-card">
+              <div class="small">Low Magnitude (≤ 4)</div>
+              <div class="value" id="lowOffenseMetric">0</div>
+              <div class="label">Largest offense group</div>
+            </div>
+            <div class="overview-card">
+              <div class="small">Assigned to Me</div>
+              <div class="value" id="myOffenseMetric">0</div>
+              <div class="label">soc.analyst / SOC_level1</div>
+            </div>
+            <div class="overview-card">
+              <div class="small">Total Offenses</div>
+              <div class="value" id="totalOffenseMetric">0</div>
+              <div class="label">Synthetic dataset</div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">Offenses by Magnitude</div>
+              <div class="card-body">
+                <div class="donut-wrap">
+                  <div class="donut" style="background:conic-gradient(#12b3b3 0 46%, #8d64ff 46% 78%, #cf4d5e 78% 92%, #ff8a3d 92% 100%)"></div>
+                  <div class="legend-list">
+                    <div><span class="legend-dot" style="background:#12b3b3"></span>Low 46%</div>
+                    <div><span class="legend-dot" style="background:#8d64ff"></span>Medium 32%</div>
+                    <div><span class="legend-dot" style="background:#cf4d5e"></span>High 14%</div>
+                    <div><span class="legend-dot" style="background:#ff8a3d"></span>Critical 8%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">Offenses by Assignee</div>
+              <div class="card-body bars">
+                <div class="bar-row"><span>admin</span><span class="hbar"><i style="width:8%"></i></span><span>2</span></div>
+                <div class="bar-row"><span>SOC_level1</span><span class="hbar"><i style="width:70%"></i></span><span>18</span></div>
+                <div class="bar-row"><span>IT_Operations</span><span class="hbar"><i style="width:42%"></i></span><span>11</span></div>
+                <div class="bar-row"><span>Unassigned</span><span class="hbar"><i style="width:28%"></i></span><span>7</span></div>
+                <div class="bar-row"><span>secops</span><span class="hbar"><i style="width:14%"></i></span><span>4</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="toolbar-inline" style="margin-top:12px">
+            <select class="field" id="offenseView">
+              <option>All Offenses</option>
+              <option>Open Offenses</option>
+              <option>Closed Offenses</option>
+              <option>My Offenses</option>
+            </select>
+            <button class="btn" id="assignBtn">Assign</button>
+            <button class="btn" id="closeOffenseBtn">Close Offense</button>
+            <button class="btn primary" id="refreshOffensesBtn">Refresh</button>
+            <span class="muted" style="margin-left:auto">Last refreshed: <span id="offenseRefreshLabel">6:33:00 AM</span></span>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="checkbox-cell"><input type="checkbox"></th>
+                  <th>Magnitude</th>
+                  <th>ID</th>
+                  <th>Offense</th>
+                  <th>Source IP</th>
+                  <th>Destination IP</th>
+                  <th>Start Date</th>
+                  <th>Status</th>
+                  <th>Type</th>
+                  <th>Owner</th>
+                </tr>
+              </thead>
+              <tbody id="offenseBody"></tbody>
+            </table>
+          </div>
+          <div class="statusbar">Showing <span id="offenseCount">0</span> synthetic offenses</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-log-activity">
+      <div class="page-title">Log Activity</div>
+      <div class="toolbar-inline">
+        <select class="field"><option>Real Time (streaming)</option><option>Last 5 Minutes</option><option>Last Hour</option></select>
+        <input class="field" id="eventSearch" placeholder="Quick Filter">
+        <button class="btn" id="pauseEventsBtn">Pause</button>
+        <button class="btn" id="eventFilterBtn">Add Filter</button>
+        <button class="btn primary" id="aqlBtn">Advanced Search</button>
+        <span class="muted" style="margin-left:auto">Streaming events: <span id="eventStreamState">On</span></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Start Time</th><th>Event Name</th><th>Log Source</th><th>Source IP</th><th>Source Port</th><th>Destination IP</th><th>Destination Port</th><th>Username</th><th>Magnitude</th>
+            </tr>
+          </thead>
+          <tbody id="eventBody"></tbody>
+        </table>
+      </div>
+      <div class="statusbar">Most recent synthetic events are displayed</div>
+    </section>
+
+    <section class="page" id="page-network-activity">
+      <div class="page-title">Network Activity</div>
+      <div class="toolbar-inline">
+        <select class="field"><option>Real Time (streaming)</option><option>Last 15 Minutes</option><option>Last Hour</option></select>
+        <input class="field" id="flowSearch" placeholder="Quick Filter">
+        <button class="btn" id="pauseFlowsBtn">Pause</button>
+        <button class="btn" id="flowFilterBtn">Add Filter</button>
+        <button class="btn primary" id="searchFlowsBtn">Search</button>
+        <span class="muted" style="margin-left:auto">Streaming flows: <span id="flowStreamState">On</span></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>First Packet</th><th>Application</th><th>Source IP</th><th>Source Port</th><th>Destination IP</th><th>Destination Port</th><th>Protocol</th><th>Bytes</th><th>Packets</th><th>Duration</th>
+            </tr>
+          </thead>
+          <tbody id="flowBody"></tbody>
+        </table>
+      </div>
+      <div class="statusbar">Synthetic network flow records</div>
+    </section>
+
+    <section class="page" id="page-assets">
+      <div class="page-title">Assets</div>
+      <div class="toolbar-inline">
+        <input class="field" id="assetSearch" placeholder="Search assets">
+        <select class="field"><option>All Networks</option><option>Servers</option><option>Workstations</option><option>DMZ</option></select>
+        <button class="btn primary" id="addAssetBtn">Add Asset</button>
+        <span class="muted" style="margin-left:auto"><span id="assetCountLabel">0</span> assets shown</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>IP Address</th><th>Asset Name</th><th>OS</th><th>MAC Address</th><th>Vulnerabilities</th><th>Risk</th><th>Last Seen</th><th>Users</th></tr></thead>
+          <tbody id="assetBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="page" id="page-reports">
+      <div class="page-title">Reports</div>
+      <div class="toolbar-inline">
+        <input class="field" id="reportSearch" placeholder="Search reports">
+        <button class="btn" id="newGroupBtn">New Group</button>
+        <button class="btn primary" id="newReportBtn">Create Report</button>
+      </div>
+      <div class="table-wrap" style="max-height:none">
+        <table>
+          <thead><tr><th>Name</th><th>Description</th><th>Schedule</th><th>Format</th><th>Action</th></tr></thead>
+          <tbody id="reportBody">
+            <tr><td>Daily SOC Summary</td><td>Open offenses, event volume, top log sources and analyst assignments.</td><td>Daily 07:00</td><td>PDF</td><td><button class="btn run-report">Run Report</button></td></tr>
+            <tr><td>Executive Security Overview</td><td>High-level security posture, incident trends and key risk indicators.</td><td>Monday 08:00</td><td>PDF</td><td><button class="btn run-report">Run Report</button></td></tr>
+            <tr><td>PCI DSS Compliance</td><td>Authentication, firewall changes and privileged activity metrics.</td><td>Monthly</td><td>PDF / CSV</td><td><button class="btn run-report">Run Report</button></td></tr>
+            <tr><td>Authentication Anomalies</td><td>Success after failure patterns and dormant account usage.</td><td>Daily 06:30</td><td>PDF</td><td><button class="btn run-report">Run Report</button></td></tr>
+            <tr><td>Log Source Health</td><td>Silent sources, EPS variance and collection health.</td><td>Every 6 Hours</td><td>PDF</td><td><button class="btn run-report">Run Report</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="page" id="page-admin">
+      <div class="page-title">Admin</div>
+      <div class="toolbar-inline">
+        <button class="btn primary" id="deployBtn">Deploy Changes</button>
+        <span class="muted">3 undeployed changes • Console: qradar-console-01 • Version 7.5.0</span>
+      </div>
+      <div class="table-wrap" style="max-height:none">
+        <table>
+          <thead><tr><th>Area</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>System and License Management</td><td>Hosts, licenses, deployment actions and system status.</td><td>Available</td></tr>
+            <tr><td>Log Sources</td><td>Configure DSM-backed event sources and collection protocols.</td><td>Available</td></tr>
+            <tr><td>Flow Sources</td><td>NetFlow, QFlow and external flow collection.</td><td>Available</td></tr>
+            <tr><td>Custom Rules</td><td>CRE rules, building blocks and responses.</td><td>Available</td></tr>
+            <tr><td>Reference Set Management</td><td>Manage IP, user, hash and other reference sets.</td><td>Available</td></tr>
+            <tr><td>Users / Roles</td><td>Console users, roles and access control.</td><td>Available</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="page" id="page-log-sources">
+      <div class="page-title">Log Sources</div>
+      <div class="toolbar-inline">
+        <input class="field" id="logSourceSearch" placeholder="Search log sources">
+        <select class="field" id="logSourceTypeFilter"><option>All Types</option><option>WinCollect</option><option>Syslog</option><option>Microsoft Exchange</option><option>DSM / API</option><option>JDBC</option></select>
+        <span class="muted" style="margin-left:auto"><span id="logSourceCountLabel">0</span> log sources</span>
+      </div>
+      <div class="table-wrap" style="max-height:none">
+        <table>
+          <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>EPS</th><th>Last Event</th></tr></thead>
+          <tbody id="logSourceBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="page" id="page-pulse">
+      <div class="page-title">Pulse</div>
+      <div class="card"><div class="card-header">Pulse Dashboard</div><div class="card-body">Pulse dashboards are simulated in this static demo.</div></div>
+    </section>
+
+    <section class="page" id="page-reference-data">
+      <div class="page-title">Reference Data Management</div>
+      <div class="table-wrap" style="max-height:none">
+        <table>
+          <thead><tr><th>Reference Set</th><th>Type</th><th>Entries</th><th>Last Modified</th></tr></thead>
+          <tbody>
+            <tr><td>VPN_BruteForce_IPs</td><td>IP</td><td>54</td><td>Today 10:55 PM</td></tr>
+            <tr><td>Admin_Users</td><td>ALN</td><td>23</td><td>Today 8:40 PM</td></tr>
+            <tr><td>Known_Good_Powershell</td><td>ALN</td><td>112</td><td>Yesterday</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="page" id="page-use-case">
+      <div class="page-title">Use Case Manager</div>
+      <div class="card"><div class="card-header">Use Cases</div><div class="card-body">Use cases, rules and coverage management placeholder for the static demo.</div></div>
+    </section>
+  </main>
+</div>
+
+<aside class="detail" id="detailPanel">
+  <div class="detail-head">
+    <div class="detail-title" id="detailTitle">Offense Details</div>
+    <button class="xbtn" id="closeDetail">×</button>
+  </div>
+  <div class="detail-tabs">
+    <div class="detail-tab active" data-dtab="summary">Summary</div>
+    <div class="detail-tab" data-dtab="events">Recent Events</div>
+    <div class="detail-tab" data-dtab="notes">Notes</div>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
+</aside>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <span id="modalTitle">Dialog</span>
+      <button class="xbtn" id="modalClose">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot">
+      <button class="btn" id="modalCancel">Cancel</button>
+      <button class="btn primary" id="modalOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Done</div>
+
+<script>
+(() => {
+  const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+  const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  const pad = n => String(n).padStart(2, "0");
+  const privateIp = () => {
+    const blocks = [
+      `10.42.${randInt(1,90)}.${randInt(10,250)}`,
+      `172.22.${randInt(1,30)}.${randInt(10,250)}`,
+      `192.168.${randInt(1,20)}.${randInt(10,250)}`
+    ];
+    return rand(blocks);
+  };
+  const publicIp = () => `${rand(["198.51.100", "203.0.113", "149.9.3", "185.220.101", "91.240.118"])}.${randInt(2,240)}`;
+  const makeMac = () => Array.from({length:6}, () => randInt(0,255).toString(16).padStart(2,'0')).join(':').toUpperCase();
+  const minutesAgoLabel = mins => {
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins} min ago`;
+    const h = Math.floor(mins/60), m = mins % 60;
+    return m ? `${h}h ${m}m ago` : `${h}h ago`;
+  };
+  const timestampBack = mins => {
+    const d = new Date(Date.now() - mins * 60000);
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  };
+  const timeOnlyBack = secs => {
+    const d = new Date(Date.now() - secs * 1000);
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  };
+
+  const lowTemplates = [
+    ["Unusual DNS Query Volume","Abnormal DNS Query Rate","Source IP"],
+    ["Single Malware Signature Match","Endpoint signature hit","Event Name"],
+    ["Repeated VPN Authentication Failures","Excessive Remote Authentication Failures","Event Name"],
+    ["Potential Port Scan","Local Network Scan Detected","Source IP"],
+    ["Blocked URL Category Access","Web category block threshold","Source IP"],
+    ["Low Volume Firewall Denies","Firewall denies from single source","Source IP"]
+  ];
+  const medTemplates = [
+    ["Dormant Account Activity","Dormant Account Used","Event Name"],
+    ["Excessive Firewall Denies","Excessive Firewall Denies from Single Source","Source IP"],
+    ["Suspicious OWA Sign-In Pattern","Multiple OWA locations observed","Event Name"],
+    ["Mailbox Audit - Inbox Rule Change","Mailbox modification detected","Event Name"],
+    ["ActiveSync Device Reconnected","Mobile device sync anomaly","Event Name"]
+  ];
+  const highTemplates = [
+    ["Potential Web Exploit Attempt","Multiple Web Attack Events to Single Destination","Event Name"],
+    ["Outbound Connection to Rare Destination","Local Host Communicating With Rare Remote Host","Source IP"],
+    ["Potential PowerShell Encoded Command","Potential Obfuscated PowerShell Execution","Event Name"],
+    ["New Administrative Account Use Detected","New Account Use Detected on Critical Server","Event Name"]
+  ];
+  const critTemplates = [
+    ["Exploit Followed by Suspicious Host Activity","Exploit then suspicious host activity","Source IP"],
+    ["Multiple Login Failures Followed by Success","Excessive Failed Logins Followed by Successful Login","Event Name"],
+    ["Potential Credential Abuse Across Exchange Services","Credential abuse across OWA/EWS/ActiveSync","Event Name"]
+  ];
+
+  const offenseOwners = ["soc.analyst","SOC_level1","IT_Operations","secops","Unassigned","network.soc"];
+  const offenseUsers = ["-","DOMAIN\p.kiss","DOMAIN\j.nagy","DOMAIN\archive.ops","DOMAIN\b.toth","SYSTEM","DOMAIN\m.kovacs","DOMAIN\svc_migration"];
+  const dstPool = ["10.42.2.10","10.42.2.15","172.22.12.20","172.22.10.41","10.42.1.53","203.0.113.77","Multiple (24)","Multiple (38)","Multiple (100)"];
+  const offenses = [];
+  let offenseId = 3380;
+  const pushOffense = (mag, tpl, idx) => {
+    const src = mag >= 8 ? rand([privateIp(), publicIp()]) : privateIp();
+    offenses.push({
+      id: offenseId--,
+      mag,
+      desc: tpl[0],
+      status: idx % 7 === 0 ? 'Closed' : 'Open',
+      start: timestampBack(idx * 11 + randInt(5, 90)),
+      src,
+      dst: rand(dstPool),
+      type: tpl[2],
+      owner: rand(offenseOwners),
+      user: rand(offenseUsers),
+      rule: tpl[1]
+    });
+  };
+  for (let i=0; i<28; i++) pushOffense(randInt(1,4), rand(lowTemplates), i);
+  for (let i=0; i<20; i++) pushOffense(randInt(3,6), rand(medTemplates), i+28);
+  for (let i=0; i<10; i++) pushOffense(randInt(6,8), rand(highTemplates), i+48);
+  for (let i=0; i<6; i++) pushOffense(randInt(8,10), rand(critTemplates), i+58);
+  offenses.sort((a,b) => b.id - a.id);
+
+  const exchangeUsers = ["DOMAIN\anna.simon","DOMAIN\mark.varga","DOMAIN\m.kovacs","DOMAIN\archive.ops","DOMAIN\n.horvath","DOMAIN\p.kiss"];
+  const mobileAgents = ["Apple-iPhone","Apple-iPad","Samsung Galaxy S23","Outlook for iOS","Outlook for Android","Android Mail"];
+  const events = [];
+  const addEvent = (secsBack, name, source, src, sport, dst, dport, user, mag) => events.push([timeOnlyBack(secsBack), name, source, src, sport, dst, dport, user, String(mag)]);
+  for (let i=0; i<12; i++) addEvent(i*9+2, "ActiveSync Sync Request", "Microsoft Exchange ActiveSync", privateIp(), String(randInt(51000,65000)), "172.22.12.20", "443", rand(exchangeUsers), randInt(2,5));
+  for (let i=0; i<8; i++) addEvent(i*11+3, "ActiveSync Device Provisioning", "Microsoft Exchange ActiveSync", privateIp(), String(randInt(51000,65000)), "172.22.12.20", "443", rand(exchangeUsers), randInt(2,4));
+  for (let i=0; i<6; i++) addEvent(i*13+5, "OWA Logon", "Microsoft Exchange Server", privateIp(), String(randInt(51000,65000)), "172.22.12.20", "443", rand(exchangeUsers), randInt(3,6));
+  for (let i=0; i<6; i++) addEvent(i*15+7, "Mailbox Audit - UpdateInboxRules", "Microsoft Exchange Server", privateIp(), "0", "172.22.12.20", "443", rand(exchangeUsers), randInt(4,6));
+  for (let i=0; i<5; i++) addEvent(i*12+4, "EWS Operation", "Microsoft Exchange EWS", privateIp(), String(randInt(51000,65000)), "172.22.12.20", "443", rand(exchangeUsers), randInt(2,4));
+  for (let i=0; i<7; i++) addEvent(i*10+6, "User Login Success", "Microsoft Windows Security Event Log", privateIp(), String(randInt(50000,64000)), "10.42.2.15", "445", rand(exchangeUsers), randInt(4,7));
+  for (let i=0; i<6; i++) addEvent(i*10+8, "Firewall Deny", rand(["Cisco ASA @ DC1","FortiGate 1800F","Palo Alto PA-5250"]), privateIp(), String(randInt(1025,65000)), publicIp(), rand(["22","80","443","3389"]), "-", randInt(3,6));
+  for (let i=0; i<5; i++) addEvent(i*14+9, "Threat Prevention Alert", "Palo Alto PA-5250", publicIp(), String(randInt(30000,65000)), "172.22.10.41", "443", "-", randInt(6,9));
+  events.sort((a,b) => b[0].localeCompare(a[0]));
+
+  const flows = [
+    ["18:57:08","SSL","10.42.11.204","60321","203.0.113.77","443","TCP","1.42 MB","1,802","00:00:34"],
+    ["18:57:07","DNS","10.42.77.23","53991","10.42.1.53","53","UDP","896 B","2","00:00:01"],
+    ["18:57:06","Microsoft-DS","10.42.17.53","51522","10.42.2.15","445","TCP","84.7 KB","163","00:00:11"],
+    ["18:57:04","HTTPS","185.220.101.34","43011","172.22.10.41","443","TCP","44.1 KB","83","00:00:06"],
+    ["18:57:03","SSH","10.42.9.44","50882","10.42.14.70","22","TCP","18.3 KB","46","00:00:27"],
+    ["18:57:02","LDAP","10.42.31.90","58441","10.42.2.10","389","TCP","26.2 KB","51","00:00:03"],
+    ["18:57:00","Kerberos","10.42.50.18","51188","10.42.2.10","88","UDP","2.4 KB","5","00:00:01"],
+    ["18:56:58","HTTPS","10.42.19.81","61422","172.22.12.20","443","TCP","212 KB","311","00:00:48"],
+    ["18:56:56","RDP","10.42.4.80","52011","10.42.2.10","3389","TCP","4.8 MB","5,209","00:14:22"],
+    ["18:56:54","NTP","10.42.2.15","123","10.42.1.20","123","UDP","1.1 KB","8","00:00:02"]
+  ];
+
+  const assetOsPool = [
+    ["Windows Server 2022","SRV"], ["Windows Server 2019","SRV"], ["Windows 11 Enterprise","WS"],
+    ["Ubuntu Server 24.04","WEB"], ["RHEL 8.10","APP"], ["Infoblox NIOS","DNS"], ["VMware ESXi 8","ESX"]
+  ];
+  const assets = Array.from({length: 84}, (_, i) => {
+    const [os, prefix] = rand(assetOsPool);
+    const net = rand([`10.42.${randInt(1,90)}.${randInt(10,250)}`, `172.22.${randInt(1,30)}.${randInt(10,250)}`]);
+    return [
+      net,
+      `${prefix}-${String(i+1).padStart(2,'0')}`,
+      os,
+      makeMac(),
+      randInt(0,15),
+      randInt(8,96),
+      minutesAgoLabel(randInt(0,420)),
+      rand(["-","1","2","3","4","8","12","18","42","113"]) 
+    ];
+  });
+  assets.unshift(
+    ["10.42.2.10","DC01","Windows Server 2022","00:50:56:A1:10:01",12,92,"2 min ago","18"],
+    ["172.22.12.20","EXCH01","Windows Server 2019","00:50:56:A1:10:22",7,78,"1 min ago","632"],
+    ["10.42.23.118","WS-ENG-118","Windows 11 Enterprise","3C:52:82:01:88:18",5,66,"just now","1"],
+    ["172.22.10.41","WEB-DMZ-01","Ubuntu Server 24.04","00:50:56:BC:10:41",8,74,"just now","2"]
+  );
+
+  const logSourceBase = [
+    ["Microsoft Windows Security Event Log","WinCollect"],
+    ["Microsoft Exchange Server","Microsoft Exchange"],
+    ["Microsoft Exchange ActiveSync","Microsoft Exchange"],
+    ["Microsoft Exchange IIS","Microsoft Exchange"],
+    ["Palo Alto PA-5250","Syslog"],
+    ["Cisco ASA @ DC1","Syslog"],
+    ["FortiGate 1800F","Syslog"],
+    ["Infoblox DNS","Syslog"],
+    ["CrowdStrike Falcon Streaming API","DSM / API"],
+    ["M365 Audit Logs","DSM / API"],
+    ["Linux OS @ APP-07","Syslog"],
+    ["Oracle Audit DB","JDBC"]
+  ];
+  const logSources = Array.from({length: 104}, (_, i) => {
+    const [name, type] = logSourceBase[i % logSourceBase.length];
+    const suffix = i < logSourceBase.length ? '' : ` #${i+1}`;
+    const status = i % 17 === 0 ? 'Warning' : (i % 23 === 0 ? 'Error' : 'Active');
+    const eps = type === 'Microsoft Exchange' ? randInt(80, 1300) : randInt(5, 3200);
+    const last = i % 21 === 0 ? '2 min ago' : (i % 15 === 0 ? '24 sec ago' : 'Just now');
+    return [name + suffix, type, status, eps.toLocaleString('en-US'), last];
+  });
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+
+  function toast(msg){
+    const t = $("#toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(window.__toast);
+    window.__toast = setTimeout(() => t.classList.remove("show"), 2200);
+  }
+
+  function formatTime(d, seconds=false){
+    return d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit", second: seconds ? "2-digit" : undefined});
+  }
+
+  function modal(title, body, okText="OK", onOk=null){
+    $("#modalTitle").textContent = title;
+    $("#modalBody").innerHTML = body;
+    $("#modalOk").textContent = okText;
+    $("#modalBackdrop").classList.add("show");
+    $("#modalOk").onclick = () => {
+      if(onOk) onOk();
+      $("#modalBackdrop").classList.remove("show");
+    };
+  }
+
+  function closeModal(){ $("#modalBackdrop").classList.remove("show"); }
+  $("#modalCancel").onclick = closeModal;
+  $("#modalClose").onclick = closeModal;
+  $("#modalBackdrop").addEventListener("click", e => { if(e.target.id === "modalBackdrop") closeModal(); });
+
+  function showPage(page){
+    $$(".page").forEach(p => p.classList.toggle("active", p.id === "page-"+page));
+    $$(".main-nav .tab").forEach(t => t.classList.toggle("active", t.dataset.page === page));
+    $$(".side-item[data-page]").forEach(i => i.classList.toggle("active", i.dataset.page === page));
+
+    const toolbar = $("#toolbar");
+    if(page === "dashboard"){
+      toolbar.innerHTML = `
+        <span>Show Dashboard:</span>
+        <select class="field" id="dashboardSelect">
+          <option>Custom Dashboard</option>
+          <option>Security Overview</option>
+          <option>Network Activity</option>
+        </select>
+        <span class="tool-link">📄 New Dashboard</span>
+        <span class="tool-link">📝 Rename Dashboard</span>
+        <span class="tool-link">⛔ Delete Dashboard</span>
+        <span class="tool-link">Add Item... ▼</span>
+        <span class="right"><span>Next Refresh: <span id="refreshClock">00:00:${String(refreshCounter).padStart(2,"0")}</span></span></span>`;
+    } else {
+      toolbar.innerHTML = `
+        <span class="tool-link">New Search</span>
+        <span class="tool-link">Save Criteria</span>
+        <span class="tool-link">Export</span>
+        <span class="sep"></span>
+        <span class="tool-link">Properties</span>
+        <span class="right"><span>System Time: <span>${formatTime(new Date())}</span></span></span>`;
+    }
+    location.hash = page;
+  }
+
+  $$(".main-nav .tab").forEach(t => t.addEventListener("click", () => showPage(t.dataset.page)));
+  $$(".side-item[data-page]").forEach(t => t.addEventListener("click", () => showPage(t.dataset.page)));
+
+  $("#toggleSidebar").addEventListener("click", () => {
+    $("#sidebar").classList.toggle("hidden");
+    toast($("#sidebar").classList.contains("hidden") ? "Sidebar hidden" : "Sidebar shown");
+  });
+
+  function renderOffenses(filter=""){
+    const view = $("#offenseView") ? $("#offenseView").value : "All Offenses";
+    const q = (filter || "").toLowerCase().trim();
+    const rows = offenses.filter(o => {
+      const full = Object.values(o).join(" ").toLowerCase();
+      const searchOk = !q || full.includes(q);
+      const viewOk =
+        view === "All Offenses" ||
+        (view === "Open Offenses" && o.status === "Open") ||
+        (view === "Closed Offenses" && o.status === "Closed") ||
+        (view === "My Offenses" && (o.owner === "soc.analyst" || o.owner === "SOC_level1"));
+      return searchOk && viewOk;
+    });
+
+    $("#offenseBody").innerHTML = rows.map(o => `
+      <tr data-id="${o.id}">
+        <td class="checkbox-cell"><input type="checkbox"></td>
+        <td><span class="pill">${o.mag}</span></td>
+        <td><a href="#" class="offense-link">${o.id}</a></td>
+        <td>${o.desc}</td>
+        <td class="mono">${o.src}</td>
+        <td class="mono">${o.dst}</td>
+        <td>${o.start}</td>
+        <td><span class="badge ${o.status === "Open" ? "open" : "closed"}">${o.status}</span></td>
+        <td>${o.type}</td>
+        <td>${o.owner}</td>
+      </tr>
+    `).join("");
+
+    $("#offenseCount").textContent = rows.length;
+    const openCount = offenses.filter(o => o.status === 'Open').length;
+    const lowCount = offenses.filter(o => o.mag <= 4).length;
+    const myCount = offenses.filter(o => ['soc.analyst','SOC_level1'].includes(o.owner)).length;
+    const totalCount = offenses.length;
+    if ($("#openOffenseMetric")) $("#openOffenseMetric").textContent = openCount;
+    if ($("#lowOffenseMetric")) $("#lowOffenseMetric").textContent = lowCount;
+    if ($("#myOffenseMetric")) $("#myOffenseMetric").textContent = myCount;
+    if ($("#totalOffenseMetric")) $("#totalOffenseMetric").textContent = totalCount;
+
+    $$(".offense-link").forEach(a => a.addEventListener("click", e => {
+      e.preventDefault();
+      const id = +e.target.closest("tr").dataset.id;
+      openOffense(id);
+    }));
+    $$("#offenseBody tr").forEach(tr => tr.addEventListener("dblclick", () => openOffense(+tr.dataset.id)));
+  }
+
+  function renderEvents(filter=""){
+    const q = filter.toLowerCase().trim();
+    const rows = events.filter(r => !q || r.join(" ").toLowerCase().includes(q));
+    $("#eventBody").innerHTML = rows.map((r,i) => `
+      <tr data-index="${i}">
+        <td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="mono">${r[3]}</td><td>${r[4]}</td><td class="mono">${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td>
+      </tr>
+    `).join("");
+    $$("#eventBody tr").forEach(tr => tr.addEventListener("dblclick", () => openEvent(+tr.dataset.index)));
+  }
+
+  function renderFlows(filter=""){
+    const q = filter.toLowerCase().trim();
+    const rows = flows.filter(r => !q || r.join(" ").toLowerCase().includes(q));
+    $("#flowBody").innerHTML = rows.map((r,i) => `
+      <tr data-index="${i}">
+        <td>${r[0]}</td><td>${r[1]}</td><td class="mono">${r[2]}</td><td>${r[3]}</td><td class="mono">${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${r[9]}</td>
+      </tr>
+    `).join("");
+    $$("#flowBody tr").forEach(tr => tr.addEventListener("dblclick", () => openFlow(+tr.dataset.index)));
+  }
+
+  function renderAssets(filter=""){
+    const q = filter.toLowerCase().trim();
+    const rows = assets.filter(r => !q || r.join(" ").toLowerCase().includes(q));
+    $("#assetBody").innerHTML = rows.map(r => `
+      <tr>
+        <td class="mono">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="mono">${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td>
+      </tr>
+    `).join("");
+    const acl = $("#assetCountLabel");
+    if (acl) acl.textContent = rows.length;
+  }
+
+  function renderLogSources(filter=""){
+    const q = filter.toLowerCase().trim();
+    const typeFilter = $("#logSourceTypeFilter") ? $("#logSourceTypeFilter").value : 'All Types';
+    const rows = logSources.filter(r => {
+      const matchesSearch = !q || r.join(' ').toLowerCase().includes(q);
+      const matchesType = typeFilter === 'All Types' || r[1] === typeFilter;
+      return matchesSearch && matchesType;
+    });
+    const body = $("#logSourceBody");
+    if (!body) return;
+    body.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td>
+      </tr>
+    `).join('');
+    const lcl = $("#logSourceCountLabel");
+    if (lcl) lcl.textContent = rows.length;
+  }
+
+  function offenseSummaryHTML(o){
+    return `
+      <table class="kv">
+        <tr><td>Offense Source</td><td>${o.type}</td><td>Offense Source</td><td>${o.src}</td></tr>
+        <tr><td>Status</td><td>${o.status}</td><td>Assigned</td><td>${o.owner}</td></tr>
+        <tr><td>Events</td><td>1527</td><td>Flows</td><td>0</td></tr>
+        <tr><td>Source IP</td><td class="mono">${o.src}</td><td>Destination IP</td><td class="mono">${o.dst}</td></tr>
+        <tr><td>Start</td><td>${o.start}</td><td>Duration</td><td>2.1 hrs</td></tr>
+        <tr><td>Categories</td><td>1.1</td><td>Networks</td><td>Other</td></tr>
+      </table>
+      <div class="grid-2">
+        <div>
+          <div style="font-weight:600;margin-bottom:8px">Insights (3)</div>
+          <div class="timeline">
+            <div class="timeline-item"><b>Exploit: Exploits Followed by Firewall Accepts</b><br><span class="muted">Suspicious external activity observed.</span></div>
+            <div class="timeline-item"><b>Threat Reduction: Updates and Virus Status 5 Offenses</b><br><span class="muted">Correlated follow-up detections.</span></div>
+            <div class="timeline-item"><b>Chained Exploit Followed by Suspicious Events</b><br><span class="muted">Chained correlation rule matched.</span></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-weight:600;margin-bottom:8px">Magnitude</div>
+          <div class="graph short wave-b" style="height:170px"></div>
+          <div class="small" style="display:flex;justify-content:space-between;margin-top:6px">
+            <span>Severity 6</span><span>Relevance 8</span><span>Credibility 2</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px;font-weight:600">Notes (1)</div>
+      <div class="small" style="margin-top:6px;line-height:1.5">
+        admin<br>
+        Sun, Jul 2, 2024 11:06 AM<br>
+        From initial investigation this looks like a valid offense, passing to user T2 Analyst for triage.
+      </div>
+    `;
+  }
+
+  function openOffense(id){
+    const o = offenses.find(x => x.id === id) || offenses[0];
+    $("#detailTitle").textContent = o.desc;
+    $("#detailBody").innerHTML = offenseSummaryHTML(o);
+    $("#detailPanel").classList.add("open");
+    $("#detailPanel").dataset.kind = "offense";
+    $("#detailPanel").dataset.id = o.id;
+    setDetailTab("summary");
+  }
+
+  function openEvent(i){
+    const r = events[i];
+    $("#detailTitle").textContent = r[1];
+    $("#detailBody").innerHTML = `
+      <table class="kv">
+        <tr><td>Start Time</td><td>2026-10-05 ${r[0]}</td></tr>
+        <tr><td>Event Name</td><td>${r[1]}</td></tr>
+        <tr><td>Log Source</td><td>${r[2]}</td></tr>
+        <tr><td>Source IP</td><td class="mono">${r[3]}</td></tr>
+        <tr><td>Source Port</td><td>${r[4]}</td></tr>
+        <tr><td>Destination IP</td><td class="mono">${r[5]}</td></tr>
+        <tr><td>Destination Port</td><td>${r[6]}</td></tr>
+        <tr><td>Username</td><td>${r[7]}</td></tr>
+        <tr><td>Magnitude</td><td>${r[8]}</td></tr>
+        <tr><td>Payload</td><td class="mono">Synthetic demo payload. No production data.</td></tr>
+      </table>`;
+    $("#detailPanel").classList.add("open");
+    $("#detailPanel").dataset.kind = "event";
+    setDetailTab("summary");
+  }
+
+  function openFlow(i){
+    const r = flows[i];
+    $("#detailTitle").textContent = `${r[2]} → ${r[4]}`;
+    $("#detailBody").innerHTML = `
+      <table class="kv">
+        <tr><td>First Packet</td><td>2026-10-05 ${r[0]}</td></tr>
+        <tr><td>Application</td><td>${r[1]}</td></tr>
+        <tr><td>Source IP</td><td class="mono">${r[2]}</td></tr>
+        <tr><td>Source Port</td><td>${r[3]}</td></tr>
+        <tr><td>Destination IP</td><td class="mono">${r[4]}</td></tr>
+        <tr><td>Destination Port</td><td>${r[5]}</td></tr>
+        <tr><td>Protocol</td><td>${r[6]}</td></tr>
+        <tr><td>Bytes</td><td>${r[7]}</td></tr>
+        <tr><td>Packets</td><td>${r[8]}</td></tr>
+        <tr><td>Duration</td><td>${r[9]}</td></tr>
+      </table>`;
+    $("#detailPanel").classList.add("open");
+    $("#detailPanel").dataset.kind = "flow";
+    setDetailTab("summary");
+  }
+
+  function setDetailTab(name){
+    $$(".detail-tab").forEach(t => t.classList.toggle("active", t.dataset.dtab === name));
+  }
+
+  $$(".detail-tab").forEach(tab => tab.addEventListener("click", () => {
+    setDetailTab(tab.dataset.dtab);
+    const kind = $("#detailPanel").dataset.kind;
+    const id = $("#detailPanel").dataset.id;
+    if(kind === "offense"){
+      const o = offenses.find(x => String(x.id) === String(id));
+      if(tab.dataset.dtab === "summary"){
+        $("#detailBody").innerHTML = offenseSummaryHTML(o);
+      } else if(tab.dataset.dtab === "events"){
+        $("#detailBody").innerHTML = events.slice(0,6).map(r => `
+          <div style="padding:7px 0;border-bottom:1px solid #2d333d">
+            <b>${r[1]}</b><br>
+            <span class="mono">${r[3]} → ${r[5]}</span> • ${r[0]}
+          </div>
+        `).join("");
+      } else {
+        $("#detailBody").innerHTML = `
+          <div class="form-row"><label>Analyst Note</label><textarea id="noteBox">Initial triage started. Correlating source host activity with authentication telemetry and firewall accepts.</textarea></div>
+          <button class="btn primary" id="saveNoteBtn">Add Note</button>`;
+        setTimeout(() => {
+          const b = $("#saveNoteBtn");
+          if(b) b.onclick = () => toast("Note saved");
+        }, 0);
+      }
+    } else {
+      toast("Only Summary is available for this item");
+    }
+  }));
+
+  $("#closeDetail").onclick = () => $("#detailPanel").classList.remove("open");
+
+  $("#offenseSearch").addEventListener("input", e => renderOffenses(e.target.value));
+  $("#offenseView").addEventListener("change", () => renderOffenses($("#offenseSearch").value));
+  $("#eventSearch").addEventListener("input", e => renderEvents(e.target.value));
+  $("#flowSearch").addEventListener("input", e => renderFlows(e.target.value));
+  $("#assetSearch").addEventListener("input", e => renderAssets(e.target.value));
+  const logSourceSearch = $("#logSourceSearch");
+  if (logSourceSearch) logSourceSearch.addEventListener("input", e => renderLogSources(e.target.value));
+  const logSourceTypeFilter = $("#logSourceTypeFilter");
+  if (logSourceTypeFilter) logSourceTypeFilter.addEventListener("change", () => renderLogSources((logSourceSearch && logSourceSearch.value) || ""));
+
+  let eventsPaused = false, flowsPaused = false;
+  $("#pauseEventsBtn").onclick = () => {
+    eventsPaused = !eventsPaused;
+    $("#pauseEventsBtn").textContent = eventsPaused ? "Resume" : "Pause";
+    $("#eventStreamState").textContent = eventsPaused ? "Paused" : "On";
+  };
+  $("#pauseFlowsBtn").onclick = () => {
+    flowsPaused = !flowsPaused;
+    $("#pauseFlowsBtn").textContent = flowsPaused ? "Resume" : "Pause";
+    $("#flowStreamState").textContent = flowsPaused ? "Paused" : "On";
+  };
+
+  $("#aqlBtn").onclick = () => modal("Advanced Search (AQL)",
+    `<div class="form-row"><label>AQL Query</label><textarea>SELECT starttime, eventname, sourceip, destinationip, username
+FROM events
+WHERE starttime > NOW() - 1 HOURS
+ORDER BY starttime DESC</textarea></div>`,
+    "Search", () => toast("Synthetic AQL query executed"));
+
+  $("#eventFilterBtn").onclick = () => modal("Add Event Filter",
+    `<div class="form-row"><label>Parameter</label><select><option>Log Source</option><option>Source IP</option><option>Destination IP</option><option>Username</option></select></div>
+     <div class="form-row"><label>Operator</label><select><option>equals</option><option>contains</option></select></div>
+     <div class="form-row"><label>Value</label><input value="Microsoft Windows Security Event Log"></div>`,
+    "Add Filter", () => toast("Event filter added"));
+
+  $("#flowFilterBtn").onclick = () => modal("Add Flow Filter",
+    `<div class="form-row"><label>Parameter</label><select><option>Application</option><option>Source IP</option><option>Destination IP</option></select></div>
+     <div class="form-row"><label>Operator</label><select><option>equals</option><option>contains</option></select></div>
+     <div class="form-row"><label>Value</label><input value="SSL"></div>`,
+    "Add Filter", () => toast("Flow filter added"));
+
+  $("#assignBtn").onclick = () => modal("Assign Offense",
+    `<div class="form-row"><label>Assign selected offense(s) to</label><select><option>soc.analyst</option><option>SOC_level1</option><option>IT_Operations</option><option>Unassigned</option></select></div>`,
+    "Assign", () => toast("Selected offense assigned"));
+
+  $("#closeOffenseBtn").onclick = () => modal("Close Offense",
+    `<div class="form-row"><label>Closing Reason</label><select><option>False positive</option><option>Non-issue</option><option>Remediated</option></select></div>
+     <div class="form-row"><label>Notes</label><textarea></textarea></div>`,
+    "Close", () => toast("Selected offense closed"));
+
+  $("#refreshOffensesBtn").onclick = () => {
+    $("#offenseRefreshLabel").textContent = formatTime(new Date(), true);
+    toast("Offenses refreshed");
+  };
+
+  $("#searchFlowsBtn").onclick = () => toast("Flow search completed");
+  $("#addAssetBtn").onclick = () => modal("Add Asset",
+    `<div class="form-row"><label>IP Address</label><input value="10.42.90.10"></div>
+     <div class="form-row"><label>Asset Name</label><input value="NEW-ASSET-01"></div>
+     <div class="form-row"><label>Operating System</label><input value="Windows 11 Enterprise"></div>`,
+    "Add Asset", () => toast("Synthetic asset added"));
+
+  $("#newGroupBtn").onclick = () => modal("New Report Group",
+    `<div class="form-row"><label>Group Name</label><input value="SOC Reports"></div>`,
+    "Create", () => toast("Report group created"));
+
+  $("#newReportBtn").onclick = () => modal("Create Report",
+    `<div class="form-row"><label>Report Name</label><input value="New QRadar Report"></div>
+     <div class="form-row"><label>Template</label><select><option>Blank</option><option>Security Overview</option><option>Compliance</option></select></div>
+     <div class="form-row"><label>Format</label><select><option>PDF</option><option>CSV</option><option>HTML</option></select></div>`,
+    "Create", () => toast("Report template created"));
+
+  $("#deployBtn").onclick = () => modal("Deploy Changes",
+    `<p>This will simulate deployment of 3 configuration changes across managed hosts.</p>`,
+    "Deploy", () => toast("Demo configuration deployed"));
+
+  $("#notifBtn").onclick = () => modal("Notifications",
+    `<div>3 pending demo notifications.</div><ul><li>Threshold crossed</li><li>Deployment pending</li><li>Associated log source could not be determined</li></ul>`,
+    "Close");
+  $("#userBtn").onclick = () => modal("User: soc.analyst",
+    `<table class="kv">
+      <tr><td>Role</td><td>SOC Analyst</td></tr>
+      <tr><td>Security Profile</td><td>All Networks (demo)</td></tr>
+      <tr><td>Last Login</td><td>2026-10-05 07:01</td></tr>
+    </table>`,
+    "Close");
+
+  $$(".run-report").forEach(b => b.addEventListener("click", () => {
+    b.textContent = "Running...";
+    b.disabled = true;
+    setTimeout(() => {
+      b.textContent = "Run Report";
+      b.disabled = false;
+      toast("Report completed");
+    }, 1200);
+  }));
+
+  $("#reportSearch").addEventListener("input", e => {
+    const q = e.target.value.toLowerCase();
+    $$("#reportBody tr").forEach(tr => tr.style.display = tr.textContent.toLowerCase().includes(q) ? "" : "none");
+  });
+
+  let refreshCounter = 5;
+  function tick(){
+    const now = new Date();
+    $("#headerClock").textContent = formatTime(now);
+    const rc = $("#refreshClock");
+    if(rc) rc.textContent = `00:00:${String(refreshCounter).padStart(2,"0")}`;
+    refreshCounter = refreshCounter <= 0 ? 5 : refreshCounter - 1;
+  }
+  setInterval(tick, 1000);
+  tick();
+
+  renderOffenses();
+  renderEvents();
+  renderFlows();
+  renderAssets();
+  renderLogSources();
+
+  const initial = location.hash.replace("#","");
+  const valid = ["dashboard","offenses","log-activity","network-activity","assets","reports","admin","log-sources","pulse","reference-data","use-case"];
+  if(valid.includes(initial)) showPage(initial);
+})();
+</script>
+</body>
+</html>
